@@ -1,0 +1,22 @@
+{
+  "name": "SudhirPT",
+  "short_name": "SudhirPT",
+  "description": "Word sterker. Fitter. Duurzame resultaten met SudhirPT personal training.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B121A",
+  "theme_color": "#0B121A",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

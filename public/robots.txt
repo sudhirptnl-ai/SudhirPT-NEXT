@@ -1,0 +1,7 @@
+# robots.txt for sudhirpt.nl
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://www.sudhirpt.nl/sitemap.xml

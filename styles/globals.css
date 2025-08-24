@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Printvriendelijk (witte achtergrond, verberg UI-elementen met .no-print) */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  a { color: #000 !important; text-decoration: none; }
+}
+/* Eén sitebrede variabele & bodykleur */
+:root {
+  --site-bg: #0b121a; /* jouw Over-mij kleur */
+}
+html, body {
+  background: var(--site-bg);
+  color: #e5e7eb;
+}
+
+/* Tailwind utility die we in index.js gebruiken */
+.bg-site {
+  background: var(--site-bg);
+}
+
+@layer components {
+  .s-card {
+    @apply rounded-xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-sm;
+  }
+  .s-pill {
+    @apply rounded-xl bg-white/5 border border-white/10 px-6 py-2 text-sm font-semibold text-gray-200;
+  }
+  .s-body {
+    @apply bg-[#0B121A] text-gray-100;
+  }
+}
