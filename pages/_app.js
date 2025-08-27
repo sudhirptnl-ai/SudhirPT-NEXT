@@ -1,69 +1,52 @@
 // pages/_app.js
-import "../styles/globals.css";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
 import Script from "next/script";
-import CookieBanner from "../components/CookieBanner";
+import "../styles/globals.css"; // laat staan als je deze al had
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID; // bv. G-SZTYF4S690
+// Haal GA-ID uit environment (Netlify -> NEXT_PUBLIC_GA_ID)
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function MyApp({ Component, pageProps }) {
-  // Zet default consent zodra gtag geladen is (en ook bij client mount als fallback)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){window.dataLayer.push(arguments);}
-      window.gtag = gtag;
+  const router = useRouter();
 
-      gtag("consent", "default", {
-        analytics_storage: "denied",
-        ad_storage: "denied",
-        ad_user_data: "denied",
-        ad_personalization: "denied",
-        functionality_storage: "granted",
-        security_storage: "granted",
-      });
-    }
-  }, []);
+  // Stuur page_view events bij routewissels
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "page_view", {
+          page_location: url,
+        });
+      }
+    };
+    router.events.on("routeChangeComplete", handleRouteChange);
+    return () => router.events.off("routeChangeComplete", handleRouteChange);
+  }, [router.events]);
 
   return (
     <>
-      {/* Google tag (gtag.js) */}
       {GA_ID && (
         <>
-          <Script
-            id="ga-consent-default"
-            strategy="beforeInteractive"
-          >{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            // Default: alles denied totdat gebruiker kiest (Consent Mode v2)
-            gtag('consent', 'default', {
-              'analytics_storage': 'denied',
-              'ad_storage': 'denied',
-              'ad_user_data': 'denied',
-              'ad_personalization': 'denied',
-              'functionality_storage': 'granted',
-              'security_storage': 'granted'
-            });
-          `}</Script>
-
+          {/* Laad gtag.js script */}
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
             strategy="afterInteractive"
           />
-          <Script id="ga-init" strategy="afterInteractive">{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_ID}', {
-              anonymize_ip: true
-            });
-          `}</Script>
+          {/* Init GA4 */}
+          <Script id="ga4-init" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              window.gtag = gtag;
+              gtag('js', new Date());
+              gtag('config', '${GA_ID}', { send_page_view: false });
+            `}
+          </Script>
         </>
       )}
 
+      {/* Rest van je app */}
       <Component {...pageProps} />
-      <CookieBanner />
     </>
   );
 }
