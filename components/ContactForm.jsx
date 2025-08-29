@@ -34,12 +34,16 @@ export default function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error("Netwerkfout");
+
+      const out = await res.json();
+      if (!res.ok || !out.ok) {
+        throw new Error(out.error || "Versturen mislukt");
+      }
 
       setStatus({ type: "success", msg: "Bedankt! Ik reageer zo snel mogelijk." });
       e.currentTarget.reset();
-    } catch {
-      setStatus({ type: "error", msg: "Er ging iets mis. Probeer het later opnieuw." });
+    } catch (err) {
+      setStatus({ type: "error", msg: err.message || "Er ging iets mis. Probeer het later opnieuw." });
     }
   }
 
@@ -51,7 +55,6 @@ export default function ContactForm() {
       viewport={{ once: true, amount: 0.25 }}
       className="mx-auto max-w-xl w-full"
     >
-      {/* Kaart */}
       <motion.div
         variants={item}
         className="rounded-2xl bg-black/30 ring-1 ring-white/10 shadow-xl shadow-black/30 p-5 sm:p-6 md:p-7 backdrop-blur-[2px]"
@@ -74,13 +77,13 @@ export default function ContactForm() {
           </motion.div>
 
           <motion.div variants={item} className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="text-sm text-gray-300">E‑mailadres</label>
+            <label htmlFor="email" className="text-sm text-gray-300">E-mailadres</label>
             <input
               id="email"
               name="email"
               type="email"
               required
-              placeholder="E‑mailadres"
+              placeholder="E-mailadres"
               className="w-full px-4 py-3 rounded-lg bg-gray-800/90 text-white placeholder-gray-400
                          focus:outline-none focus:ring-2 focus:ring-red-500/70 focus:bg-gray-800"
             />
@@ -108,7 +111,7 @@ export default function ContactForm() {
               defaultValue=""
             >
               <option value="" disabled>Kies een dienst…</option>
-              <option>1‑op‑1 Personal Training</option>
+              <option>1-op-1 Personal Training</option>
               <option>Duo Training</option>
               <option>Rittenkaart</option>
             </select>
