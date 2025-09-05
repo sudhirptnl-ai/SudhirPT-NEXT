@@ -33,7 +33,7 @@ export default function PdfButtons({ targetId, filename = "document.pdf", gaLabe
     const forceDarkStyles = `
       #${CSS.escape(targetId)} {
         background-color: #0b121a !important;
-        color: #ffffff !important;
+        color: #0b121a !important;
       }
       #${CSS.escape(targetId)} h1,
       #${CSS.escape(targetId)} h2,
