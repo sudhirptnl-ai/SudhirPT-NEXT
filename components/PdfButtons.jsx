@@ -27,35 +27,21 @@ export default function PdfButtons({ targetId, filename = "document.pdf", gaLabe
 
     // 1) Forceer donker + witte tekst ALLEEN tijdens export op dit element
     const styleId = "pdf-force-dark";
-    const existing = document.getElementById(styleId);
-    if (existing) existing.remove();
+    document.getElementById(styleId)?.remove();
 
     const forceDarkStyles = `
       #${CSS.escape(targetId)} {
         background-color: #0b121a !important;
-        color: #0b121a !important;
+        color: #ffffff !important;              /* ← tekst basis wit */
       }
-      #${CSS.escape(targetId)} h1,
-      #${CSS.escape(targetId)} h2,
-      #${CSS.escape(targetId)} h3,
-      #${CSS.escape(targetId)} h4,
-      #${CSS.escape(targetId)} h5,
-      #${CSS.escape(targetId)} h6,
-      #${CSS.escape(targetId)} p,
-      #${CSS.escape(targetId)} li,
-      #${CSS.escape(targetId)} a,
-      #${CSS.escape(targetId)} strong,
-      #${CSS.escape(targetId)} em {
-        color: #ffffff !important;
-      }
-      #${CSS.escape(targetId)} .prose-invert :where(p,li,small,span) {
-        color: #ffffff !important;
-      }
-      /* Zorg dat kleuren exact gerenderd worden */
       #${CSS.escape(targetId)} * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        color: #ffffff !important;              /* ← alle tekst wit */
       }
+      /* Als je ergens expliciet andere kleuren wilt (bijv. links), pas hier aan */
+      #${CSS.escape(targetId)} a { color: #d1d5db !important; } /* zacht grijs voor links */
+      #${CSS.escape(targetId)} strong { color: #ffffff !important; font-weight: 700; }
     `;
     const style = document.createElement("style");
     style.id = styleId;
@@ -70,11 +56,10 @@ export default function PdfButtons({ targetId, filename = "document.pdf", gaLabe
         margin: [10, 10, 10, 10], // mm
         filename,
         image: { type: "jpeg", quality: 0.98 },
-        // Gebruik de CSS-achtergrond die we net geforceerd hebben
         html2canvas: {
           scale: 2,
           useCORS: true,
-          backgroundColor: null, // <<< belangrijk: neem de echte (geforceerde) bg over
+          backgroundColor: "#0b121a",           // ← exact dezelfde bg als de site
         },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["avoid-all", "css", "legacy"] },
@@ -83,8 +68,7 @@ export default function PdfButtons({ targetId, filename = "document.pdf", gaLabe
       await html2pdf().set(opt).from(el).save();
     } finally {
       // 2) Opruimen – site weer exact zoals voorheen
-      const s = document.getElementById(styleId);
-      if (s) s.remove();
+      document.getElementById(styleId)?.remove();
     }
   }, [targetId, filename, track]);
 
