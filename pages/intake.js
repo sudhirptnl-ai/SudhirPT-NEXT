@@ -1,169 +1,109 @@
 // pages/intake.js
 import Head from "next/head";
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-
-const PAGE_TITLE = "Intakeformulier & Gezondheidsverklaring";
-
-function parseContentToHtmlAndToc(raw) {
-  const lines = raw.split(/\r?\n/);
-  const toc = [];
-  const html = [];
-  let para = [];
-
-  const escapeHtml = (s) =>
-    s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-
-  const flushPara = () => {
-    if (para.length) {
-      const text = para.join("\n");
-      html.push(`<div style="white-space:pre-wrap">${escapeHtml(text)}</div>`);
-      para = [];
-    }
-  };
-
-  lines.forEach((line) => {
-    const m = line.match(/^##\s+(.+)$/);
-    if (m) {
-      flushPara();
-      const title = m[1].trim();
-      const id = `sec-${toc.length + 1}`;
-      toc.push({ id, text: title });
-      html.push(`<h2 id="${id}">${escapeHtml(title)}</h2>`);
-    } else {
-      para.push(line);
-    }
-  });
-  flushPara();
-
-  return { html: html.join("\n"), toc };
-}
+import PdfButtons from "../components/PdfButtons";
 
 export default function Intake() {
-  const articleRef = useRef(null);
-  const [toc, setToc] = useState([]);
-
-  // ======= PLAK HIER JE EXACTE TEKST =======
-  const RAW = useMemo(
-    () => `
-Dit formulier dient voorafgaand aan de eerste trainingssessie ingevuld en ondertekend te worden. Alle gegevens worden vertrouwelijk behandeld.
-## Persoonlijke gegevens
-Naam: __________________________________________
-Geboortedatum: _______________
-Telefoonnummer: _______________
-E-mailadres: ___________________
-Adres: __________________________________________
-## Doelen en motivatie
-Wat wil je bereiken met personal training?
-☐ Afvallen    ☐ Spiermassa opbouwen    ☐ Conditie verbeteren    ☐ Revalidatie    ☐ Anders: __________________________
-Heb je eerder aan fitness of sport gedaan?
-☐ Ja    ☐ Nee
-Heb je voorkeuren of beperkingen qua oefeningen?
-__________________________________________________
-## Gezondheidsverklaring
-Beantwoord de volgende vragen naar waarheid:
-1. Heb je last van hartklachten of een hoge bloeddruk?
-☐ Ja    ☐ Nee
-Toelichting (indien van toepassing): __________________________________________
-2. Heb je recent een operatie of blessure gehad?
-☐ Ja    ☐ Nee
-Toelichting (indien van toepassing): __________________________________________
-3. Gebruik je medicijnen die van invloed zijn op fysieke inspanning?
-☐ Ja    ☐ Nee
-Toelichting (indien van toepassing): __________________________________________
-4. Heb je last van duizeligheid of ademhalingsproblemen bij inspanning?
-☐ Ja    ☐ Nee
-Toelichting (indien van toepassing): __________________________________________
-5. Zijn er andere medische omstandigheden waar wij rekening mee moeten houden?
-☐ Ja    ☐ Nee
-Toelichting (indien van toepassing): __________________________________________
-## Verklaring en toestemming
-Ik verklaar dat de bovenstaande informatie naar waarheid is ingevuld. Ik begrijp dat deelname aan trainingen bij Sudhir PT op eigen risico is en ik ben zelf verantwoordelijk voor het informeren van Sudhir PT bij veranderingen in mijn gezondheid.
-Handtekening klant: _______________________    Datum: ___________
-Ik geef toestemming voor het verwerken van mijn persoonsgegevens zoals beschreven in de privacyverklaring van Sudhir PT.
-Handtekening: _______________________    Datum: ___________   
-`, []
-  );  
-
-  // =========================================
-
-  const parsed = useMemo(() => parseContentToHtmlAndToc(RAW), [RAW]);
-
-  useEffect(() => { setToc(parsed.toc); }, [parsed.toc]);
-
-  const handlePrint = () => window.print();
-  const handlePdf = () => {
-    const w = window.open("", "_blank", "noopener,noreferrer");
-    if (!w) return;
-    const html = `
-      <html>
-        <head>
-          <title>${PAGE_TITLE}</title>
-          <link rel="stylesheet" href="/styles/globals.css" />
-          <style>
-            body { background:#0B121A; color:#E5E7EB; font-family: ui-sans-serif, system-ui, -apple-system; }
-            .legal-wrap { max-width: 62rem; margin: 2rem auto; padding: 0 1rem; }
-            h1 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
-            h2 { font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: .75rem; }
-            div[style*="white-space:pre-wrap"] { line-height: 1.7; }
-          </style>
-        </head>
-        <body>
-          <div class="legal-wrap">
-            <h1>${PAGE_TITLE}</h1>
-            ${parsed.html}
-          </div>
-          <script>window.print()</script>
-        </body>
-      </html>`;
-    w.document.open(); w.document.write(html); w.document.close();
-  };
-
   return (
     <>
-      <Head><title>{PAGE_TITLE} • SudhirPT</title></Head>
-      <main className="min-h-screen bg-gray-900 text-gray-100">
-        <div className="no-print sticky top-16 z-40 bg-black/60 backdrop-blur border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-4 py-2">
-            <Link href="/" className="text-sm text-red-500 hover:underline">← Terug naar site</Link>
-          </div>
+      <Head>
+        <title>Intakeformulier & Gezondheidsverklaring – Sudhir PT</title>
+      </Head>
+
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        <div className="flex items-center justify-between gap-4 mb-6 print:hidden">
+          <a href="/" className="text-sm text-red-400 hover:text-red-300">← Terug naar site</a>
+          <PdfButtons
+            targetId="intake-content"
+            filename="Intakeformulier-SudhirPT.pdf"
+            gaLabel="intake"
+          />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 pt-16 pb-24">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-3xl font-extrabold tracking-tight">{PAGE_TITLE}</h1>
-            <div className="flex gap-3">
-              <button onClick={handlePrint} className="rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2 text-sm font-semibold">Print</button>
-              <button onClick={handlePdf} className="rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold">Download PDF</button>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Sidebar */}
+          <aside className="md:col-span-4 lg:col-span-3 print:hidden">
+            <div className="sticky top-4 rounded-xl bg-black/30 ring-1 ring-white/10 p-4">
+              <h2 className="text-lg font-semibold mb-3">Inhoud</h2>
+              <nav className="text-sm space-y-2 leading-6">
+                <a href="#intro" className="block hover:text-red-300">Introductie</a>
+                <a href="#persoonlijk" className="block hover:text-red-300">Persoonlijke gegevens</a>
+                <a href="#doelen" className="block hover:text-red-300">Doelen en motivatie</a>
+                <a href="#gezondheid" className="block hover:text-red-300">Gezondheidsverklaring</a>
+                <a href="#verklaring" className="block hover:text-red-300">Verklaring & toestemming</a>
+              </nav>
             </div>
-          </div>
+          </aside>
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-12">
-            <aside className="lg:col-span-3">
-              <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-                <h2 className="text-base font-semibold">Inhoud</h2>
-                {toc.length === 0 ? (
-                  <p className="mt-2 text-sm text-gray-400">—</p>
-                ) : (
-                  <ol className="mt-3 space-y-2 text-sm">
-                    {toc.map((t) => (
-                      <li key={t.id}>
-                        <a href={`#${t.id}`} className="text-gray-300 hover:text-white">{t.text}</a>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </div>
-            </aside>
+          {/* Content */}
+          <main id="intake-content" className="md:col-span-8 lg:col-span-9 prose prose-invert max-w-none relative pdf-watermark">
+            <h1 className="!mb-6">Intakeformulier & Gezondheidsverklaring</h1>
 
-            <article
-              ref={articleRef}
-              className="prose prose-invert max-w-none lg:col-span-9"
-              dangerouslySetInnerHTML={{ __html: parsed.html }}
-            />
-          </div>
+            <h2 id="intro">Introductie</h2>
+            <p>
+              Dit formulier dient voorafgaand aan de eerste trainingssessie ingevuld en
+              ondertekend te worden. Alle gegevens worden vertrouwelijk behandeld.
+            </p>
+
+            <h2 id="persoonlijk">Persoonlijke gegevens</h2>
+            <ul>
+              <li>Naam: ____________________________</li>
+              <li>Geboortedatum: ____________________</li>
+              <li>Telefoonnummer: ___________________</li>
+              <li>E-mailadres: ______________________</li>
+              <li>Adres: ____________________________</li>
+            </ul>
+
+            <h2 id="doelen">Doelen en motivatie</h2>
+            <p>Wat wil je bereiken met personal training?</p>
+            <ul>
+              <li>☐ Afvallen</li>
+              <li>☐ Spiermassa opbouwen</li>
+              <li>☐ Conditie verbeteren</li>
+              <li>☐ Revalidatie</li>
+              <li>☐ Anders: ____________________</li>
+            </ul>
+
+            <p>Heb je eerder aan fitness of sport gedaan? ☐ Ja ☐ Nee</p>
+            <p>Heb je voorkeuren of beperkingen qua oefeningen? _____________________</p>
+
+            <h2 id="gezondheid">Gezondheidsverklaring</h2>
+            <ol>
+              <li>Heb je last van hartklachten of hoge bloeddruk? ☐ Ja ☐ Nee – Toelichting: _________</li>
+              <li>Heb je recent een operatie of blessure gehad? ☐ Ja ☐ Nee – Toelichting: _________</li>
+              <li>Gebruik je medicijnen die inspanning beïnvloeden? ☐ Ja ☐ Nee – Toelichting: _________</li>
+              <li>Heb je last van duizeligheid of ademhalingsproblemen bij inspanning? ☐ Ja ☐ Nee – Toelichting: _________</li>
+              <li>Andere medische omstandigheden waar rekening mee moet worden gehouden? ☐ Ja ☐ Nee – Toelichting: _________</li>
+            </ol>
+
+            <h2 id="verklaring">Verklaring en toestemming</h2>
+            <p>
+              Ik verklaar dat de bovenstaande informatie naar waarheid is ingevuld. Ik begrijp dat deelname aan trainingen bij Sudhir PT op eigen risico is en ik ben zelf verantwoordelijk voor het informeren van Sudhir PT bij veranderingen in mijn gezondheid.
+            </p>
+            <p>
+              Handtekening klant: _____________________ &nbsp;&nbsp; Datum: __________
+            </p>
+          </main>
         </div>
-      </main>
+      </div>
+
+      <style jsx global>{`
+        .pdf-watermark::before { display: none; }
+        @media print {
+          .print\\:hidden { display: none !important; }
+          .pdf-watermark::before {
+            content: "Sudhir PT";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 4rem;
+            font-weight: 700;
+            color: rgba(200, 200, 200, 0.08);
+            pointer-events: none;
+            white-space: nowrap;
+          }
+        }
+      `}</style>
     </>
   );
 }

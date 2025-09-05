@@ -1,172 +1,133 @@
 // pages/privacy.js
 import Head from "next/head";
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-
-const PAGE_TITLE = "Privacyverklaring";
-
-function parseContentToHtmlAndToc(raw) {
-  const lines = raw.split(/\r?\n/);
-  const toc = [];
-  const html = [];
-  let para = [];
-
-  const escapeHtml = (s) =>
-    s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-
-  const flushPara = () => {
-    if (para.length) {
-      const text = para.join("\n");
-      html.push(`<div style="white-space:pre-wrap">${escapeHtml(text)}</div>`);
-      para = [];
-    }
-  };
-
-  lines.forEach((line) => {
-    const m = line.match(/^##\s+(.+)$/);
-    if (m) {
-      flushPara();
-      const title = m[1].trim();
-      const id = `sec-${toc.length + 1}`;
-      toc.push({ id, text: title });
-      html.push(`<h2 id="${id}">${escapeHtml(title)}</h2>`);
-    } else {
-      para.push(line);
-    }
-  });
-  flushPara();
-
-  return { html: html.join("\n"), toc };
-}
+import PdfButtons from "../components/PdfButtons";
 
 export default function Privacy() {
-  const articleRef = useRef(null);
-  const [toc, setToc] = useState([]);
-
-  // ======= PLAK HIER JE EXACTE TEKST =======
-  const RAW = useMemo(
-    () => `
-    Laatste update: 31-08-2025
-## Artikel 1:  Verantwoordelijke
-Sudhir PT
-Sudhir Sewtahalsing
-Prins Johan Willem Frisolaan 272
-KvK: 98034820
-E-mail: info@sudhirpt.nl
-## Artikel 2: Welke persoonsgegevens verzamelen wij?
-Wij kunnen de volgende gegevens verzamelen:
-- Naam, adres, woonplaats (NAW-gegevens)
-- Telefoonnummer en e-mailadres
-- Geboortedatum
-- Gezondheidsgegevens (voor trainingsdoeleinden)
-- Informatie over je trainingsdoelen en voortgang
-- Betaalgegevens
-## Artikel 3: Waarom verzamelen wij deze gegevens?
-Wij verwerken je gegevens voor de volgende doeleinden:
-- Om je aan te melden als klant
-- Voor het plannen en uitvoeren van trainingen
-- Om contact met je op te nemen
-- Voor facturatie en administratie
-- Om trainingen af te stemmen op jouw gezondheid en doelen
-- Voor het voldoen aan wettelijke verplichtingen
-## Artikel 4: Hoe lang bewaren wij jouw gegevens?
-- Administratieve gegevens: maximaal 7 jaar (fiscale bewaarplicht)
-- Gezondheidsgegevens: maximaal 2 jaar na beëindiging van de dienstverlening, tenzij je eerder om verwijdering vraagt
-## Artikel 5: Delen van gegevens
-Wij delen jouw gegevens niet met derden, tenzij:
-- Dit wettelijk verplicht is (bijv. voor de Belastingdienst)
-- Je daar uitdrukkelijk toestemming voor hebt gegeven
-## Artikel 6: Beveiliging van gegevens
-Sudhir PT neemt passende technische en organisatorische maatregelen om jouw gegevens te beschermen tegen verlies, misbruik of onbevoegde toegang.
-## Artikel 7: Rechten van betrokkenen
-Je hebt het recht om:
-- Je gegevens in te zien, aan te passen of te laten verwijderen
-- Bezwaar te maken tegen de verwerking van je gegevens
-- Je toestemming op elk moment in te trekken
-Stuur hiervoor een e-mail naar info@sudhirpt.nl
-## Artikel 8: Klachten
-Heb je een klacht over de verwerking van je persoonsgegevens? Neem dan contact met ons op. Je hebt ook het recht om een klacht in te dienen bij de Autoriteit Persoonsgegevens via https://autoriteitpersoonsgegevens.nl.
-`, []
-  );
-  // =========================================
-
-  const parsed = useMemo(() => parseContentToHtmlAndToc(RAW), [RAW]);
-
-  useEffect(() => { setToc(parsed.toc); }, [parsed.toc]);
-
-  const handlePrint = () => window.print();
-  const handlePdf = () => {
-    const w = window.open("", "_blank", "noopener,noreferrer");
-    if (!w) return;
-    const html = `
-      <html>
-        <head>
-          <title>${PAGE_TITLE}</title>
-          <link rel="stylesheet" href="/styles/globals.css" />
-          <style>
-            body { background:#0B121A; color:#E5E7EB; font-family: ui-sans-serif, system-ui, -apple-system; }
-            .legal-wrap { max-width: 62rem; margin: 2rem auto; padding: 0 1rem; }
-            h1 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; }
-            h2 { font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: .75rem; }
-            div[style*="white-space:pre-wrap"] { line-height: 1.7; }
-          </style>
-        </head>
-        <body>
-          <div class="legal-wrap">
-            <h1>${PAGE_TITLE}</h1>
-            ${parsed.html}
-          </div>
-          <script>window.print()</script>
-        </body>
-      </html>`;
-    w.document.open(); w.document.write(html); w.document.close();
-  };
-
   return (
     <>
-      <Head><title>{PAGE_TITLE} • SudhirPT</title></Head>
-      <main className="min-h-screen bg-gray-900 text-gray-100">
-        <div className="no-print sticky top-16 z-40 bg-black/60 backdrop-blur border-b border-white/10">
-          <div className="mx-auto max-w-6xl px-4 py-2">
-            <Link href="/" className="text-sm text-red-500 hover:underline">← Terug naar site</Link>
-          </div>
+      <Head>
+        <title>Privacyverklaring – Sudhir PT</title>
+      </Head>
+
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        <div className="flex items-center justify-between gap-4 mb-6 print:hidden">
+          <a href="/" className="text-sm text-red-400 hover:text-red-300">← Terug naar site</a>
+          <PdfButtons
+            targetId="privacy-content"
+            filename="Privacyverklaring-SudhirPT.pdf"
+            gaLabel="privacy"
+          />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 pt-16 pb-24">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-3xl font-extrabold tracking-tight">{PAGE_TITLE}</h1>
-            <div className="flex gap-3">
-              <button onClick={handlePrint} className="rounded-lg bg-gray-800 hover:bg-gray-700 px-4 py-2 text-sm font-semibold">Print</button>
-              <button onClick={handlePdf} className="rounded-lg bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold">Download PDF</button>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Sidebar */}
+          <aside className="md:col-span-4 lg:col-span-3 print:hidden">
+            <div className="sticky top-4 rounded-xl bg-black/30 ring-1 ring-white/10 p-4">
+              <h2 className="text-lg font-semibold mb-3">Inhoud</h2>
+              <nav className="text-sm space-y-2 leading-6">
+                <a href="#verantwoordelijke" className="block hover:text-red-300">Artikel 1: Verantwoordelijke</a>
+                <a href="#gegevens" className="block hover:text-red-300">Artikel 2: Gegevens</a>
+                <a href="#doeleinden" className="block hover:text-red-300">Artikel 3: Waarom verzamelen</a>
+                <a href="#bewaartermijn" className="block hover:text-red-300">Artikel 4: Bewaartermijn</a>
+                <a href="#delen" className="block hover:text-red-300">Artikel 5: Delen</a>
+                <a href="#beveiliging" className="block hover:text-red-300">Artikel 6: Beveiliging</a>
+                <a href="#rechten" className="block hover:text-red-300">Artikel 7: Rechten</a>
+                <a href="#klachten" className="block hover:text-red-300">Artikel 8: Klachten</a>
+              </nav>
             </div>
-          </div>
+          </aside>
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-12">
-            <aside className="lg:col-span-3">
-              <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-                <h2 className="text-base font-semibold">Inhoud</h2>
-                {toc.length === 0 ? (
-                  <p className="mt-2 text-sm text-gray-400">—</p>
-                ) : (
-                  <ol className="mt-3 space-y-2 text-sm">
-                    {toc.map((t) => (
-                      <li key={t.id}>
-                        <a href={`#${t.id}`} className="text-gray-300 hover:text-white">{t.text}</a>
-                      </li>
-                    ))}
-                  </ol>
-                )}
-              </div>
-            </aside>
+          {/* Content */}
+          <main id="privacy-content" className="md:col-span-8 lg:col-span-9 prose prose-invert max-w-none relative pdf-watermark">
+            <h1 className="!mb-6">Privacyverklaring – Sudhir PT</h1>
+            <p><em>Laatste update: 31-08-2025</em></p>
 
-            <article
-              ref={articleRef}
-              className="prose prose-invert max-w-none lg:col-span-9"
-              dangerouslySetInnerHTML={{ __html: parsed.html }}
-            />
-          </div>
+            <h2 id="verantwoordelijke">Artikel 1 – Verantwoordelijke</h2>
+            <p>
+              Sudhir PT<br />
+              Sudhir Sewtahalsing<br />
+              Prins Johan Willem Frisolaan 272<br />
+              KvK: 98034820<br />
+              E-mail: <a href="mailto:info@sudhirpt.nl">info@sudhirpt.nl</a>
+            </p>
+
+            <h2 id="gegevens">Artikel 2 – Welke persoonsgegevens verzamelen wij?</h2>
+            <ul>
+              <li>Naam, adres, woonplaats (NAW-gegevens)</li>
+              <li>Telefoonnummer en e-mailadres</li>
+              <li>Geboortedatum</li>
+              <li>Gezondheidsgegevens (voor trainingsdoeleinden)</li>
+              <li>Informatie over trainingsdoelen en voortgang</li>
+              <li>Betaalgegevens</li>
+            </ul>
+
+            <h2 id="doeleinden">Artikel 3 – Waarom verzamelen wij deze gegevens?</h2>
+            <ul>
+              <li>Om je aan te melden als klant</li>
+              <li>Voor het plannen en uitvoeren van trainingen</li>
+              <li>Om contact met je op te nemen</li>
+              <li>Voor facturatie en administratie</li>
+              <li>Om trainingen af te stemmen op jouw gezondheid en doelen</li>
+              <li>Voor het voldoen aan wettelijke verplichtingen</li>
+            </ul>
+
+            <h2 id="bewaartermijn">Artikel 4 – Hoe lang bewaren wij jouw gegevens?</h2>
+            <ul>
+              <li>Administratieve gegevens: maximaal 7 jaar (fiscale bewaarplicht)</li>
+              <li>Gezondheidsgegevens: maximaal 2 jaar na beëindiging van de dienstverlening, tenzij je eerder om verwijdering vraagt</li>
+            </ul>
+
+            <h2 id="delen">Artikel 5 – Delen van gegevens</h2>
+            <p>
+              Wij delen jouw gegevens niet met derden, tenzij:
+            </p>
+            <ul>
+              <li>Dit wettelijk verplicht is (bijv. Belastingdienst)</li>
+              <li>Je daar uitdrukkelijk toestemming voor hebt gegeven</li>
+            </ul>
+
+            <h2 id="beveiliging">Artikel 6 – Beveiliging van gegevens</h2>
+            <p>
+              Sudhir PT neemt passende technische en organisatorische maatregelen om jouw gegevens te beschermen tegen verlies, misbruik of onbevoegde toegang.
+            </p>
+
+            <h2 id="rechten">Artikel 7 – Rechten van betrokkenen</h2>
+            <ul>
+              <li>Inzage, correctie of verwijdering</li>
+              <li>Bezwaar maken tegen verwerking</li>
+              <li>Toestemming intrekken</li>
+              <li>Mail: <a href="mailto:info@sudhirpt.nl">info@sudhirpt.nl</a></li>
+            </ul>
+
+            <h2 id="klachten">Artikel 8 – Klachten</h2>
+            <p>
+              Heb je een klacht? Neem contact met ons op. Je kunt ook terecht bij de Autoriteit Persoonsgegevens:{" "}
+              <a href="https://autoriteitpersoonsgegevens.nl" target="_blank" rel="noreferrer">
+                https://autoriteitpersoonsgegevens.nl
+              </a>.
+            </p>
+          </main>
         </div>
-      </main>
+      </div>
+
+      <style jsx global>{`
+        .pdf-watermark::before { display: none; }
+        @media print {
+          .print\\:hidden { display: none !important; }
+          .pdf-watermark::before {
+            content: "Sudhir PT";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 4rem;
+            font-weight: 700;
+            color: rgba(200, 200, 200, 0.08);
+            pointer-events: none;
+            white-space: nowrap;
+          }
+        }
+      `}</style>
     </>
   );
 }
