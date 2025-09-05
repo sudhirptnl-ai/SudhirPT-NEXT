@@ -56,6 +56,9 @@ export default function ContactForm() {
       if (dienstSelect) dienstSelect.value = "";
 
       setStatus({ type: "success", msg: "Bedankt! Je bericht is verzonden." });
+      
+      // GA4 event
+      import("../lib/gtag").then(({ contactSubmit }) => contactSubmit());
 
       // Zet na 2.5s de knop weer terug naar “Versturen”
       const t = setTimeout(() => setStatus({ type: "idle", msg: "" }), 2500);

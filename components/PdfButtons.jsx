@@ -1,5 +1,7 @@
 // components/PdfButtons.jsx
 import { useCallback } from "react";
+import { pdfPrint, pdfDownload } from "../lib/gtag";
+
 
 export default function PdfButtons({ targetId, filename = "document.pdf", gaLabel = "doc" }) {
   const track = useCallback((action) => {
@@ -12,11 +14,13 @@ export default function PdfButtons({ targetId, filename = "document.pdf", gaLabe
 
   const handlePrint = useCallback(() => {
     track("print_click");
+    pdfPrint(gaLabel);
     if (typeof window !== "undefined") window.print();
   }, [track]);
 
   const handleDownload = useCallback(async () => {
     track("pdf_download_click");
+    pdfDownload(gaLabel);
     if (typeof window === "undefined") return;
 
     const el = document.getElementById(targetId);
