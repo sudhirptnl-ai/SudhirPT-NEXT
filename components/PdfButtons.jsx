@@ -1,20 +1,9 @@
 // components/PdfButtons.jsx
 import { useCallback } from "react";
 
-/**
- * PdfButtons
- * - Print-knop => window.print()
- * - Download PDF => html2pdf.js van de target (id) DOM-node
- *
- * Props:
- *   - targetId:   string (id van de DOM-node die je als PDF wilt)
- *   - filename:   string (naam van de PDF, bijv. "Privacyverklaring-SudhirPT.pdf")
- *   - gaLabel:    string (label voor GA4 event tracking)
- */
 export default function PdfButtons({ targetId, filename = "document.pdf", gaLabel = "doc" }) {
   const track = useCallback((action) => {
     try {
-      // optioneel: GA4 event
       if (typeof window !== "undefined" && window.gtag) {
         window.gtag("event", action, {
           event_category: "pdf",
@@ -41,16 +30,19 @@ export default function PdfButtons({ targetId, filename = "document.pdf", gaLabe
       return;
     }
 
-    // Dynamische import; bundelt niet op de server
     const html2pdf = (await import("html2pdf.js")).default;
 
     const opt = {
-      margin:       [10, 10, 10, 10], // mm
+      margin: [10, 10, 10, 10], // mm
       filename,
-      image:        { type: "jpeg", quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#0b121a" },
-      jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak:    { mode: ["avoid-all", "css", "legacy"] },
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        backgroundColor: "#0b121a"  // <<< FIX 1: jouw site achtergrond
+      },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
     };
 
     await html2pdf().set(opt).from(el).save();
