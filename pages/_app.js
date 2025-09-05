@@ -1,10 +1,11 @@
 // pages/_app.js
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import Script from "next/script";
 import "../styles/globals.css"; // laat staan als je deze al had
 
-// Haal GA-ID uit environment (Netlify -> NEXT_PUBLIC_GA_ID)
+// Haal GA-ID uit environment
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function MyApp({ Component, pageProps }) {
@@ -14,9 +15,7 @@ export default function MyApp({ Component, pageProps }) {
   useEffect(() => {
     const handleRouteChange = (url) => {
       if (typeof window !== "undefined" && window.gtag) {
-        window.gtag("event", "page_view", {
-          page_location: url,
-        });
+        window.gtag("event", "page_view", { page_location: url });
       }
     };
     router.events.on("routeChangeComplete", handleRouteChange);
@@ -25,6 +24,11 @@ export default function MyApp({ Component, pageProps }) {
 
   return (
     <>
+      <Head>
+        {/* Zorgt dat mobiele statusbalk je merk-kleur toont */}
+        <meta name="theme-color" content="#0b121a" />
+      </Head>
+
       {GA_ID && (
         <>
           {/* Laad gtag.js script */}
@@ -45,8 +49,13 @@ export default function MyApp({ Component, pageProps }) {
         </>
       )}
 
-      {/* Rest van je app */}
-      <Component {...pageProps} />
+      {/* ✅ Globale wrapper: forceer overal dezelfde achtergrondkleur */}
+      <div
+        className="min-h-screen text-white"
+        style={{ backgroundColor: "#0b121a" }} // hard fallback los van Tailwind
+      >
+        <Component {...pageProps} />
+      </div>
     </>
   );
 }
