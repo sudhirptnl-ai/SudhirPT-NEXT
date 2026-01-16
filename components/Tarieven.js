@@ -93,7 +93,7 @@ export default function Tarieven() {
           <h2 className="text-4xl font-extrabold tracking-tight">Tarieven</h2>
           <p className="mt-2 text-gray-300">
             Trajecten van 3 of 6 maanden • Inclusief persoonlijk trainingsplan en
-            voedingsschema’s
+            voedingsschema’s • Alle personal training binnen de gym verloopt via een PT-abonnement à €34.95 per 4 weken
           </p>
         </motion.div>
 

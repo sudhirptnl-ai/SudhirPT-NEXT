@@ -22,6 +22,14 @@ html, body {
   background: var(--site-bg);
 }
 
+:root {
+  --site-bg: #0b121a;
+}
+html, body {
+  background: var(--site-bg) !important; /* <-- forceer overal */
+  color: #e5e7eb;
+}
+
 @layer components {
   .s-card {
     @apply rounded-xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-sm;
